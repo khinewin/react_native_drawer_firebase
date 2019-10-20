@@ -1,5 +1,5 @@
 import React, {Component } from 'react';
-import {View, Text, StyleSheet, ScrollView, FlatList, Alert} from 'react-native'
+import {View, Text, StyleSheet, Image,ScrollView, FlatList, Alert} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import {Header, Card, Button} from 'react-native-elements'
 import Firebase from './Firebase'
@@ -30,7 +30,8 @@ export default class Users extends Component{
                     id: i,
                     name: u[i].name,
                     email: u[i].email,
-                    phone: u[i].phone
+                    phone: u[i].phone,
+                    photo: u[i].photo
                 })
            }
            this.setState({users: data})
@@ -39,6 +40,8 @@ export default class Users extends Component{
             console.log(err)
         })
     }
+
+    
 
     onRefresh=()=>{
         this.fetchUsers();
@@ -74,7 +77,9 @@ export default class Users extends Component{
         )
     }
     render(){
+        console.log(this.state.users)
         return(
+            
             <View>
                 <Header
                     placement="center"
@@ -95,10 +100,13 @@ export default class Users extends Component{
                 data={this.state.users}
                 refreshing={this.state.loading}
                 onRefresh={()=>this.onRefresh()}
+
                 renderItem={(user)=>{
                     return(
+                        
                         <View style={styles.myList}>
                             <View>
+                                <Image source={{uri: "https://firebasestorage.googleapis.com/v0/b/react-native-lesson-56eaf.appspot.com/o/students%2F"+user.item.photo+"?alt=media&token=210764db-712a-420c-ab02-3a147aadfb89"}} style={{width: 100, height: 100}}></Image>
                                 <Text style={styles.myListText}><Icon name="user"></Icon> {user.item.name}</Text>
                                 <Text style={styles.myListText}><Icon name="envelope"></Icon> {user.item.email}</Text>
                                 <Text style={styles.myListText}><Icon name="phone"></Icon> {user.item.phone}</Text>

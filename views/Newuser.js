@@ -1,8 +1,12 @@
 import React, {Component } from 'react';
-import {View, Text, StyleSheet} from 'react-native'
+import {View, Text, StyleSheet,Image, TouchableOpacity} from 'react-native'
 import {Header, Card, Input, Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Firebase from './Firebase'
+
+import * as ImagePicker from 'expo-image-picker'
+import Constants from 'expo-constants'
+import * as Permissions from 'expo-permissions'
 
 export default class Newuser extends Component{
     static navigationOptions={
@@ -13,7 +17,7 @@ export default class Newuser extends Component{
     }
     constructor(props){
         super(props)
-        this.state=({name: '', email:'', phone: '', message:'', showMessage:false, error :"", showError: false, loading: false})
+        this.state=({photo:null, name: '', email:'', phone: '', message:'', showMessage:false, error :"", showError: false, loading: false})
 
     }
     openMyDrawer=()=>{
@@ -44,10 +48,11 @@ export default class Newuser extends Component{
         Firebase.database().ref("students").push({
             name: this.state.name,
             email: this.state.email,
-            phone:this.state.phone
+            phone:this.state.phone,
+            photo: this.state.photo.split('/').pop()
         })
         .then(res=>{
-            this.setState({showMessage:true, message: "The new user have been created.", name: '', email:'', phone:''})
+            this.setState({showMessage:true, message: "The new user have been created.",photo:'', name: '', email:'', phone:''})
 
             setTimeout(()=>{
                 this.setState({showMessage: false, message: ""}) 
@@ -57,7 +62,46 @@ export default class Newuser extends Component{
             console.log(err)
         })
 
+        this.uploadImage(this.state.photo)
 
+
+    }
+
+    uploadImage = async(uri) => {
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const filename=uri.split("/").pop();
+        var ref = Firebase.storage().ref("students").child(filename);
+        return ref.put(blob);
+      }
+
+    componentDidMount=()=>{
+        this.getPermissionAsync();
+    }
+    getPermissionAsync = async () => {
+        if (Constants.platform.ios) {
+          const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+          const {status1}=await Permissions.askAsync(Permissions.CAMERA)
+          if (status !== 'granted' && status1 !== 'granted') {
+            alert('Sorry, we need camera roll permissions to make this work!');
+          }
+        }
+      }
+    pickImage=async()=>{
+        let result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.All,
+            allowsEditing: true,
+            aspect: [4, 3],
+          });
+      
+          console.log(result);
+         
+      
+          if (!result.cancelled) {
+            this.setState({ photo: result.uri });
+          }
+          
+          console.log(filename)
     }
 
     render(){
@@ -85,6 +129,15 @@ export default class Newuser extends Component{
                   }
                 <Card>
                     <View style={{marginBottom: 20}}>
+
+                    <View style={{margin: 20, justifyContent:'center', alignItems:'center'}}>
+                    {this.state.photo &&
+                            <Image source={{ uri: this.state.photo }} style={{ width: 100, height: 100 }} />}
+                            <TouchableOpacity onPress={()=>this.pickImage()} style={{justifyContent:'center' , alignItems:'center'}}>
+                                <Text><Icon name="camera"></Icon> Choose Image</Text>
+                            </TouchableOpacity>
+                    </View>
+
                     <Input 
                     onFocus={()=>this.clearError()}
                     onChangeText={(t)=>this.setState({name: t})}

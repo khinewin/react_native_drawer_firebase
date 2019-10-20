@@ -4,6 +4,8 @@ import {Header, Card, Input, Button} from 'react-native-elements'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import Firebase from './Firebase'
 
+
+
 export default class Edit extends Component{
     static navigationOptions={
         drawerLabel: ()=>null,
@@ -12,7 +14,7 @@ export default class Edit extends Component{
     constructor(props){
         super(props)
         const user=props.navigation.state.params.user;
-        this.state=({name: user.name, email:user.email, phone: user.phone, id: user.id, message:'', showMessage:false, error :"", showError: false, loading: false})
+        this.state=({photo:null,name: user.name, email:user.email, phone: user.phone, id: user.id, message:'', showMessage:false, error :"", showError: false, loading: false})
        
         
       
